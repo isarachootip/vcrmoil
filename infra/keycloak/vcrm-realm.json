@@ -1,0 +1,106 @@
+{
+  "realm": "vcrm",
+  "enabled": true,
+  "displayName": "vCRM Platform",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "SuperAdmin",
+        "description": "Platform super administrator"
+      },
+      {
+        "name": "TenantAdmin",
+        "description": "Tenant administrator"
+      },
+      {
+        "name": "Supervisor",
+        "description": "Call center supervisor"
+      },
+      {
+        "name": "Agent",
+        "description": "Contact center agent"
+      },
+      {
+        "name": "QAEvaluator",
+        "description": "Quality assurance evaluator"
+      },
+      {
+        "name": "KBEditor",
+        "description": "Knowledge base author/editor"
+      },
+      {
+        "name": "Viewer",
+        "description": "Read-only viewer"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "vcrm-web",
+      "name": "vCRM Web Client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "rootUrl": "http://localhost:3000",
+      "baseUrl": "/",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://*.localhost:3000/*",
+        "http://localhost:4000/*"
+      ],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*##http://*.localhost:3000/*"
+      }
+    },
+    {
+      "clientId": "vcrm-api",
+      "name": "vCRM API Resource Server",
+      "enabled": true,
+      "bearerOnly": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@vcrm.local",
+      "email": "admin@vcrm.local",
+      "firstName": "Super",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["SuperAdmin"]
+    },
+    {
+      "username": "agent@vcrm.local",
+      "email": "agent@vcrm.local",
+      "firstName": "Sompong",
+      "lastName": "Jaidee",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["Agent"]
+    }
+  ]
+}
