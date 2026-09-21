@@ -8,6 +8,7 @@ import { EventsModule } from './events/events.module';
 import { DatabaseModule } from './database/database.module';
 import { TenantModule } from './tenant/tenant.module';
 import { IamModule } from './iam/iam.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { IamModule } from './iam/iam.module';
     DatabaseModule,
     TenantModule,
     IamModule,
+    AuthModule,
     HealthModule,
     EventsModule,
   ],

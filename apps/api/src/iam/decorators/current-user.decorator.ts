@@ -1,10 +1,10 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Request } from 'express';
 import { UserContext } from '@vcrm/shared';
 
-export interface AuthenticatedRequest {
+export interface AuthenticatedRequest extends Request {
   user?: UserContext;
   dataScope?: string;
-  [key: string]: unknown;
 }
 
 export const CurrentUser = createParamDecorator(
