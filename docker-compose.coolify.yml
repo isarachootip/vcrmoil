@@ -1,0 +1,75 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vcrm-api
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      API_PORT: 4000
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+      API_URL: ${API_URL:-http://localhost:4000}
+      WEB_URL: ${WEB_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://vcrm_app:${POSTGRES_APP_PASSWORD:-changeme}@postgres:5432/vcrm
+      DATABASE_MIGRATION_URL: postgresql://vcrm_owner:${POSTGRES_OWNER_PASSWORD:-changeme}@postgres:5432/vcrm
+      REDIS_URL: redis://redis:6379
+      JWT_LOCAL_SECRET: ${JWT_LOCAL_SECRET:-vcrm-coolify-secret-key-change-in-production}
+      AUTH_MODE: ${AUTH_MODE:-local}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-http://localhost:8080/realms/vcrm}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-vcrm-web}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: vcrm-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: vcrm
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/docker/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d vcrm']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: vcrm-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
