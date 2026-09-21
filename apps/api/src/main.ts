@@ -15,7 +15,9 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('API_PORT', 4000);
+  const port = process.env.PORT
+    ? parseInt(process.env.PORT, 10)
+    : configService.get<number>('API_PORT', 4000);
   const redisUrl = configService.get<string>('REDIS_URL', 'redis://localhost:6379');
 
   // Pino Logger
