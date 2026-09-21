@@ -15,8 +15,19 @@ export class Rfc7807ExceptionFilter implements ExceptionFilter {
     let code = 'INTERNAL_ERROR';
     let errors: Record<string, string[]> | undefined;
 
+    const STATUS_TO_CODE: Record<number, string> = {
+      [HttpStatus.BAD_REQUEST]: 'BAD_REQUEST',
+      [HttpStatus.UNAUTHORIZED]: 'UNAUTHORIZED',
+      [HttpStatus.FORBIDDEN]: 'FORBIDDEN',
+      [HttpStatus.NOT_FOUND]: 'NOT_FOUND',
+      [HttpStatus.CONFLICT]: 'CONFLICT',
+      [HttpStatus.UNPROCESSABLE_ENTITY]: 'UNPROCESSABLE_ENTITY',
+      [HttpStatus.INTERNAL_SERVER_ERROR]: 'INTERNAL_ERROR',
+    };
+
     if (exception instanceof HttpException) {
       status = exception.getStatus();
+      code = STATUS_TO_CODE[status] || 'ERROR';
       const res = exception.getResponse();
 
       if (typeof res === 'string') {

@@ -18,6 +18,10 @@ model Tenant {
   created_at DateTime       @default(now()) @db.Timestamptz(6)
   updated_at DateTime       @updatedAt @db.Timestamptz(6)
   configs    TenantConfig[]
+  users      User[]
+  teams      Team[]
+  roles      Role[]
+  skills     Skill[]
 
   @@map("tenants")
 }
@@ -35,4 +39,108 @@ model TenantConfig {
   @@unique([tenant_id, key])
   @@index([tenant_id])
   @@map("tenant_configs")
+}
+
+model Team {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String   @db.VarChar(128)
+  description String?  @db.Text
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+  created_by  String?  @db.VarChar(64)
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  users       User[]
+
+  @@unique([tenant_id, name])
+  @@index([tenant_id])
+  @@map("teams")
+}
+
+model Role {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id   String?          @db.Uuid
+  name        String           @db.VarChar(64)
+  description String?          @db.Text
+  is_system   Boolean          @default(false)
+  created_at  DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime         @updatedAt @db.Timestamptz(6)
+  tenant      Tenant?          @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  users       User[]
+  permissions RolePermission[]
+
+  @@unique([tenant_id, name])
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String           @unique @db.VarChar(64) // e.g. 'user.create', 'case.read'
+  module      String           @db.VarChar(64)
+  action      String           @db.VarChar(64)
+  description String?          @db.Text
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role_id       String     @db.Uuid
+  permission_id String     @db.Uuid
+  data_scope    String     @default("all") @db.VarChar(32) // own | team | all
+  role          Role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission    Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+
+  @@unique([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+model User {
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id            String      @db.Uuid
+  email                String      @db.VarChar(255)
+  name                 String      @db.VarChar(255)
+  role_id              String      @db.Uuid
+  team_id              String?     @db.Uuid
+  status               String      @default("offline") @db.VarChar(32) // online | away | offline
+  max_concurrent_chats Int         @default(3)
+  created_at           DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime    @updatedAt @db.Timestamptz(6)
+  created_by           String?     @db.VarChar(64)
+  tenant               Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  role                 Role        @relation(fields: [role_id], references: [id])
+  team                 Team?       @relation(fields: [team_id], references: [id], onDelete: SetNull)
+  skills               UserSkill[]
+
+  @@unique([tenant_id, email])
+  @@index([tenant_id])
+  @@map("users")
+}
+
+model Skill {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id   String      @db.Uuid
+  name        String      @db.VarChar(128)
+  description String?     @db.Text
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime    @updatedAt @db.Timestamptz(6)
+  tenant      Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user_skills UserSkill[]
+
+  @@unique([tenant_id, name])
+  @@index([tenant_id])
+  @@map("skills")
+}
+
+model UserSkill {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id  String @db.Uuid
+  skill_id String @db.Uuid
+  level    Int    @default(1) // 1 to 5
+  user     User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  skill    Skill  @relation(fields: [skill_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, skill_id])
+  @@map("user_skills")
 }

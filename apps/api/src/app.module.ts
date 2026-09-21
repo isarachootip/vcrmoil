@@ -7,6 +7,7 @@ import { HealthModule } from './health/health.module';
 import { EventsModule } from './events/events.module';
 import { DatabaseModule } from './database/database.module';
 import { TenantModule } from './tenant/tenant.module';
+import { IamModule } from './iam/iam.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { TenantModule } from './tenant/tenant.module';
     }),
     DatabaseModule,
     TenantModule,
+    IamModule,
     HealthModule,
     EventsModule,
   ],

@@ -73,3 +73,24 @@ export const createTenantSchema = z.object({
 });
 
 export type CreateTenantDto = z.infer<typeof createTenantSchema>;
+
+export enum DataScope {
+  OWN = 'own',
+  TEAM = 'team',
+  ALL = 'all',
+}
+
+export interface UserContext {
+  id: string;
+  tenantId: string;
+  email: string;
+  name: string;
+  role: string;
+  teamId?: string | null;
+  status: AgentStatus;
+  maxConcurrentChats: number;
+  permissions: Array<{
+    code: string;
+    dataScope: DataScope;
+  }>;
+}
