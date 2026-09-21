@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto';
 import { validateEnv } from './config/env.config';
 import { HealthModule } from './health/health.module';
 import { EventsModule } from './events/events.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { EventsModule } from './events/events.module';
         };
       },
     }),
+    DatabaseModule,
     HealthModule,
     EventsModule,
   ],

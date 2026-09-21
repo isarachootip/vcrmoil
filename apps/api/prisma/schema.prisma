@@ -1,0 +1,38 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_MIGRATION_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug       String         @unique @db.VarChar(63)
+  name       String         @db.VarChar(255)
+  status     String         @default("trial") @db.VarChar(32) // trial | active | suspended
+  plan       String         @default("standard") @db.VarChar(64)
+  settings   Json           @default("{\"timezone\": \"Asia/Bangkok\", \"locale\": \"th\"}")
+  created_at DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at DateTime       @updatedAt @db.Timestamptz(6)
+  configs    TenantConfig[]
+
+  @@map("tenants")
+}
+
+model TenantConfig {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id  String   @db.Uuid
+  key        String   @db.VarChar(128)
+  value      Json
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
+  created_by String?  @db.VarChar(64)
+  tenant     Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id])
+  @@map("tenant_configs")
+}
