@@ -34,3 +34,9 @@ Thumbs.db
 # local data
 docker-data/
 recordings-sample/
+
+# agents runtime logs
+ORIGINAL_REQUEST.md
+.agents/*
+!.agents/rules/
+!.agents/workflows/

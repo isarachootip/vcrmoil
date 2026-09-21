@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { HealthCheckResult, HealthService } from './health.service';
 
 @ApiTags('Health')
@@ -19,13 +20,27 @@ export class HealthController {
         uptime: 120.4,
         environment: 'development',
         version: '1.0.0',
+        info: {
+          database: { status: 'up' },
+          redis: { status: 'up' },
+        },
         checks: {
           system: { status: 'up' },
+          database: { status: 'up' },
+          redis: { status: 'up' },
         },
       },
     },
   })
-  check(): HealthCheckResult {
-    return this.healthService.check();
+  @ApiResponse({
+    status: 503,
+    description: 'System is degraded or dependencies unavailable',
+  })
+  async check(@Res({ passthrough: true }) res: Response): Promise<HealthCheckResult> {
+    const result = await this.healthService.check();
+    if (result.status !== 'ok') {
+      res.status(HttpStatus.SERVICE_UNAVAILABLE);
+    }
+    return result;
   }
 }

@@ -15,12 +15,12 @@ import { IamService } from './iam.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RequirePermission } from './decorators/require-permission.decorator';
-import { CurrentUser } from './decorators/current-user.decorator';
+import { CurrentDataScope, CurrentUser } from './decorators/current-user.decorator';
 import { CurrentTenant } from '../tenant/tenant-context.decorator';
 import { ActiveTenantGuard } from '../tenant/guards/active-tenant.guard';
 import { PermissionGuard } from './guards/permission.guard';
 import { Permissions } from './iam.constants';
-import { TenantContext, UserContext } from '@vcrm/shared';
+import { DataScope, TenantContext, UserContext } from '@vcrm/shared';
 import { AuditPiiView } from '../audit/decorators/audit.decorator';
 
 @ApiTags('IAM — Users')
@@ -49,8 +49,12 @@ export class UsersController {
   @RequirePermission(Permissions.USER_READ)
   @ApiOperation({ summary: 'List all users in current tenant' })
   @ApiResponse({ status: 200, description: 'List of users' })
-  async listUsers(@CurrentTenant() tenant: TenantContext) {
-    return this.iamService.listUsers(tenant.id);
+  async listUsers(
+    @CurrentTenant() tenant: TenantContext,
+    @CurrentUser() currentUser?: UserContext,
+    @CurrentDataScope() dataScope?: DataScope,
+  ) {
+    return this.iamService.listUsers(tenant.id, currentUser, dataScope);
   }
 
   @Get(':id')

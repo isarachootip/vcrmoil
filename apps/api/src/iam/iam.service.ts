@@ -7,6 +7,7 @@ import { CreateTeamDto } from './dto/create-team.dto';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { AssignSkillDto } from './dto/assign-skill.dto';
 import { AgentStatus, DataScope, UserContext } from '@vcrm/shared';
+import { DataScopeHelper } from './helpers/data-scope.helper';
 
 @Injectable()
 export class IamService {
@@ -56,10 +57,16 @@ export class IamService {
     });
   }
 
-  async listUsers(tenantId: string, _user?: UserContext, _scope?: DataScope) {
+  async listUsers(tenantId: string, user?: UserContext, scope?: DataScope) {
+    const scopeFilter =
+      user && scope ? DataScopeHelper.buildFilter(user, scope, { userField: 'id' }) : {};
+
     return this.tenantPrisma.withTenant(tenantId, async (tx) => {
       return tx.user.findMany({
-        where: { tenant_id: tenantId },
+        where: {
+          tenant_id: tenantId,
+          ...scopeFilter,
+        },
         include: {
           role: true,
           team: true,

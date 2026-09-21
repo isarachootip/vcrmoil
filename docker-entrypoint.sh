@@ -8,7 +8,6 @@ echo "========================================="
 # Fallback DATABASE_MIGRATION_URL to DATABASE_URL and vice-versa
 MIGRATION_DB_URL="${DATABASE_MIGRATION_URL:-$DATABASE_URL}"
 export DATABASE_URL="${DATABASE_URL:-$DATABASE_MIGRATION_URL}"
-export DATABASE_MIGRATION_URL="${DATABASE_MIGRATION_URL:-$DATABASE_URL}"
 
 # Apply database migrations if database URL is configured
 if [ -n "$MIGRATION_DB_URL" ]; then
@@ -33,6 +32,15 @@ if [ -n "$MIGRATION_DB_URL" ]; then
   }
   echo "Database migrations step completed."
 fi
+
+# =========================================================================
+# Security Hardening: Purge superuser migration credentials from runtime
+# =========================================================================
+echo "Sanitizing runtime environment: purging superuser migration credentials..."
+DATABASE_MIGRATION_URL=""
+unset DATABASE_MIGRATION_URL
+MIGRATION_DB_URL=""
+unset MIGRATION_DB_URL
 
 echo "Starting NestJS API server on port ${PORT:-4000}..."
 exec node apps/api/dist/main.js

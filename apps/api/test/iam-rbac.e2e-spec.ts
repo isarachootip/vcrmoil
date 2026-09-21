@@ -133,7 +133,19 @@ describe('IAM & RBAC Permission Guard (e2e)', () => {
         }
         return Promise.resolve(null);
       }),
-      findMany: jest.fn().mockImplementation(() => Promise.resolve([...inMemoryUsers])),
+      findMany: jest.fn().mockImplementation(({ where } = {}) => {
+        let results = [...inMemoryUsers];
+        if (where?.tenant_id) {
+          results = results.filter((u) => u.tenant_id === where.tenant_id);
+        }
+        if (where?.id) {
+          results = results.filter((u) => u.id === where.id);
+        }
+        if (where?.team_id) {
+          results = results.filter((u) => u.team_id === where.team_id);
+        }
+        return Promise.resolve(results);
+      }),
       create: jest.fn().mockImplementation(({ data }) => {
         const created = {
           id: randomUUID(),
@@ -476,6 +488,113 @@ describe('IAM & RBAC Permission Guard (e2e)', () => {
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
+    });
+  });
+
+  describe('RBAC DataScope Enforcement on User Listings', () => {
+    const teamAlphaId = randomUUID();
+    const teamBetaId = randomUUID();
+
+    const agentAlpha: UserContext = {
+      id: randomUUID(),
+      tenantId: testTenant.id,
+      email: 'agent.alpha@acme.com',
+      name: 'Agent Alpha',
+      role: 'Agent',
+      teamId: teamAlphaId,
+      status: AgentStatus.ONLINE,
+      maxConcurrentChats: 3,
+      permissions: [{ code: Permissions.USER_READ, dataScope: DataScope.OWN }],
+    };
+
+    const supervisorAlpha: UserContext = {
+      id: randomUUID(),
+      tenantId: testTenant.id,
+      email: 'supervisor.alpha@acme.com',
+      name: 'Supervisor Alpha',
+      role: 'Supervisor',
+      teamId: teamAlphaId,
+      status: AgentStatus.ONLINE,
+      maxConcurrentChats: 5,
+      permissions: [{ code: Permissions.USER_READ, dataScope: DataScope.TEAM }],
+    };
+
+    beforeAll(() => {
+      // Seed distinct users across team Alpha and team Beta into inMemoryUsers
+      inMemoryUsers.push(
+        {
+          id: agentAlpha.id,
+          tenant_id: testTenant.id,
+          email: agentAlpha.email,
+          name: agentAlpha.name,
+          role_id: agentRoleId,
+          team_id: teamAlphaId,
+          status: 'online',
+          max_concurrent_chats: 3,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: supervisorAlpha.id,
+          tenant_id: testTenant.id,
+          email: supervisorAlpha.email,
+          name: supervisorAlpha.name,
+          role_id: agentRoleId,
+          team_id: teamAlphaId,
+          status: 'online',
+          max_concurrent_chats: 5,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: randomUUID(),
+          tenant_id: testTenant.id,
+          email: 'agent.beta@acme.com',
+          name: 'Agent Beta',
+          role_id: agentRoleId,
+          team_id: teamBetaId,
+          status: 'online',
+          max_concurrent_chats: 3,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      );
+    });
+
+    it('enforces DataScope.OWN returning only the current user record', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/iam/users')
+        .set('X-Tenant', 'acme')
+        .set('X-Mock-User', JSON.stringify(agentAlpha));
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].id).toBe(agentAlpha.id);
+      expect(res.body[0].email).toBe(agentAlpha.email);
+    });
+
+    it('enforces DataScope.TEAM returning only users in the caller team', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/iam/users')
+        .set('X-Tenant', 'acme')
+        .set('X-Mock-User', JSON.stringify(supervisorAlpha));
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(2);
+      expect(res.body.every((u: { team_id?: string }) => u.team_id === teamAlphaId)).toBe(true);
+    });
+
+    it('enforces DataScope.ALL returning all users in the tenant', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/iam/users')
+        .set('X-Tenant', 'acme')
+        .set('X-Mock-User', JSON.stringify(adminUser));
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(3);
     });
   });
 });
