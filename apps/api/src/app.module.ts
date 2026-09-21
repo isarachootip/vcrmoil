@@ -6,6 +6,7 @@ import { validateEnv } from './config/env.config';
 import { HealthModule } from './health/health.module';
 import { EventsModule } from './events/events.module';
 import { DatabaseModule } from './database/database.module';
+import { TenantModule } from './tenant/tenant.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { DatabaseModule } from './database/database.module';
       },
     }),
     DatabaseModule,
+    TenantModule,
     HealthModule,
     EventsModule,
   ],
