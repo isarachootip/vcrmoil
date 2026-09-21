@@ -58,7 +58,7 @@ RUN chmod +x ./docker-entrypoint.sh && chown -R nestjs:nodejs /app
 USER nestjs
 EXPOSE 4000
 
-HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=10s \
+HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=90s \
   CMD curl -f http://localhost:4000/health || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

@@ -1,6 +1,15 @@
--- Enable UUID extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Enable UUID extensions (safely ignore if non-superuser or extension already handled)
+DO $$
+BEGIN
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
 -- CreateTable tenants
 CREATE TABLE IF NOT EXISTS "tenants" (
