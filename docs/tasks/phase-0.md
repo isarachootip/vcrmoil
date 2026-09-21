@@ -8,7 +8,7 @@
 | ------ | ---- | --------------------------------------------------- | ---------- | ---- |
 | [x]    | 0.1  | Monorepo scaffold                                   | —          | 0.5d |
 | [x]    | 0.2  | Local infrastructure (Docker Compose)               | 0.1        | 0.5d |
-| [ ]    | 0.3  | API skeleton (NestJS core)                          | 0.1        | 0.5d |
+| [x]    | 0.3  | API skeleton (NestJS core)                          | 0.1        | 0.5d |
 | [ ]    | 0.4  | Database, Prisma & tenant RLS                       | 0.2, 0.3   | 1d   |
 | [ ]    | 0.5  | Tenant resolution & SaaS provisioning               | 0.4        | 1d   |
 | [ ]    | 0.6  | IAM: users, teams, roles, permissions, skills       | 0.4        | 1d   |
