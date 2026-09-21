@@ -21,6 +21,7 @@ import { ActiveTenantGuard } from '../tenant/guards/active-tenant.guard';
 import { PermissionGuard } from './guards/permission.guard';
 import { Permissions } from './iam.constants';
 import { TenantContext, UserContext } from '@vcrm/shared';
+import { AuditPiiView } from '../audit/decorators/audit.decorator';
 
 @ApiTags('IAM — Users')
 @ApiBearerAuth('bearer')
@@ -54,6 +55,11 @@ export class UsersController {
 
   @Get(':id')
   @RequirePermission(Permissions.USER_READ)
+  @AuditPiiView({
+    entity: 'user',
+    piiFields: ['name', 'email'],
+    purpose: 'View user profile and PII',
+  })
   @ApiOperation({ summary: 'Get user details by ID' })
   @ApiResponse({ status: 200, description: 'User details' })
   @ApiResponse({ status: 404, description: 'User not found' })

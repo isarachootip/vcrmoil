@@ -13,7 +13,7 @@
 | [x]    | 0.5  | Tenant resolution & SaaS provisioning               | 0.4        | 1d   |
 | [x]    | 0.6  | IAM: users, teams, roles, permissions, skills       | 0.4        | 1d   |
 | [x]    | 0.7  | Authentication (Keycloak OIDC + local JWT fallback) | 0.2, 0.6   | 1d   |
-| [ ]    | 0.8  | Audit log                                           | 0.4        | 0.5d |
+| [x]    | 0.8  | Audit log                                           | 0.4        | 0.5d |
 | [ ]    | 0.9  | Domain events + outbox                              | 0.4        | 0.5d |
 | [ ]    | 0.10 | Worker app (BullMQ)                                 | 0.2, 0.9   | 0.5d |
 | [ ]    | 0.11 | Web app shell                                       | 0.1, 0.7   | 1d   |

@@ -32,3 +32,4 @@ vcrm/
 | ADR | Date       | Decision                                                       | Reason                                             |
 | --- | ---------- | -------------------------------------------------------------- | -------------------------------------------------- |
 | 001 | 2026-09-20 | SaaS multi-tenant on AWS, cloud AI, 3CX V20 latest, no vCRMOCR | Business decision (see SYSTEM_DESIGN Decision Log) |
+| 002 | 2026-09-21 | Append-only AuditLog with RLS isolation & @AuditPiiView        | PDPA compliance, non-repudiation and access audit  |

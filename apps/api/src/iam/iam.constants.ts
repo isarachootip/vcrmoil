@@ -11,6 +11,7 @@ export const Permissions = {
   CASE_READ: 'case.read',
   CASE_UPDATE: 'case.update',
   CONTACT_PII_VIEW: 'contact.pii.view',
+  AUDIT_READ: 'audit.read',
 } as const;
 
 export type PermissionCode = (typeof Permissions)[keyof typeof Permissions] | string;

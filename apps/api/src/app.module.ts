@@ -3,12 +3,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { randomUUID } from 'crypto';
 import { validateEnv } from './config/env.config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HealthModule } from './health/health.module';
 import { EventsModule } from './events/events.module';
 import { DatabaseModule } from './database/database.module';
 import { TenantModule } from './tenant/tenant.module';
 import { IamModule } from './iam/iam.module';
 import { AuthModule } from './auth/auth.module';
+import { AuditModule } from './audit/audit.module';
+import { AuditInterceptor } from './audit/interceptors/audit.interceptor';
 
 @Module({
   imports: [
@@ -48,8 +51,15 @@ import { AuthModule } from './auth/auth.module';
     TenantModule,
     IamModule,
     AuthModule,
+    AuditModule,
     HealthModule,
     EventsModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
+    },
   ],
 })
 export class AppModule {}
